@@ -1,4 +1,13 @@
 """Application configuration with comprehensive validation."""
+# src/ pe_orgair / config / settings .py
+2 """
+3 Application configuration with comprehensive validation .
+4
+5 Implements fail - fast validation :
+6 - Dimension weights must sum to 1.0
+7 - Scoring parameters have explicit bounds
+8 - Production requires security settings
+9 """
 from typing import Optional, Literal, List
 from functools import lru_cache
 from decimal import Decimal
@@ -88,6 +97,10 @@ class Settings(BaseSettings):
     OTEL_EXPORTER_OTLP_ENDPOINT: Optional[str] = None
     OTEL_SERVICE_NAME: str = "pe-orgair"
     
+ # ========================================
+ # VALIDATORS
+ # ========================================
+
     @field_validator("OPENAI_API_KEY")
     @classmethod
     def validate_openai_key(cls, v: Optional[SecretStr]) -> Optional[SecretStr]:
@@ -123,12 +136,18 @@ class Settings(BaseSettings):
     def dimension_weights(self) -> List[float]:
         """Get dimension weights as list."""
         return [
-            self.W_DATA_INFRA, self.W_AI_GOVERNANCE, self.W_TECH_STACK,
-            self.W_TALENT, self.W_LEADERSHIP, self.W_USE_CASES, self.W_CULTURE
+            self.W_DATA_INFRA, 
+            self.W_AI_GOVERNANCE, 
+            self.W_TECH_STACK,
+            self.W_TALENT, 
+            self.W_LEADERSHIP, 
+            self.W_USE_CASES, 
+            self.W_CULTURE
         ]
 
 @lru_cache
 def get_settings() -> Settings:
+    """ Get cached settings instance ."""
     return Settings()
 
 settings = get_settings()
